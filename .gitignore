@@ -1,0 +1,15 @@
+# VS Code local settings
+.vscode/
+
+# Raw datasets
+data/raw/
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+
+# Virtual environments
+.venv/
+venv/
