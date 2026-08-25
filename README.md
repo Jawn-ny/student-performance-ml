@@ -224,3 +224,172 @@ Conclusion:
 Limitations:
 
 当前 Baseline 不根据不同学生的 Feature 产生不同预测，因此只能作为最简单的比较基准。
+
+# Day 6：LinearRegression
+
+第一次训练并评价真正利用 Feature 进行预测的回归模型：
+
+`LinearRegression`
+
+## DummyRegressor 与 LinearRegression
+
+之前的 Baseline：
+
+`DummyRegressor(strategy="mean")`
+
+主要学习训练集 `y_train` 的平均 G3，并对所有测试样本预测相同的值。
+
+LinearRegression 则会利用当前的 Feature：
+
+* age
+* studytime
+* failures
+* absences
+
+学习这些 Feature 与 G3 之间的线性关系。
+
+## 模型训练
+
+使用：
+
+`linear_model.fit(X_train, y_train)`
+
+让 LinearRegression 根据训练数据学习模型参数。
+
+训练完成后，模型学习到了：
+
+* `coef_`：各 Feature 对线性预测公式的权重
+* `intercept_`：线性预测公式中的基础值
+
+当前学习到的系数约为：
+
+* age：+0.0067
+* studytime：+0.7648
+* failures：-2.0302
+* absences：-0.0190
+
+intercept 约为：
+
+`10.7554`
+
+这些系数表示当前模型中的统计关系，不能直接解释为现实中的因果关系。
+
+## 模型预测
+
+使用：
+
+`linear_model.predict(X_test)`
+
+让训练完成的模型对测试集 Feature 进行预测。
+
+与 DummyRegressor 不同，LinearRegression 会根据不同学生的 Feature 产生不同的预测 G3。
+
+回归模型可以产生小数预测值，例如：
+
+`12.33`
+
+即使原始 G3 是整数，这也是正常现象。
+
+## RMSE
+
+LinearRegression 在当前测试集上的结果：
+
+`RMSE ≈ 2.88`
+
+之前的 Baseline：
+
+`DummyRegressor RMSE ≈ 3.17`
+
+当前比较：
+
+| Model            | RMSE |
+| ---------------- | ---: |
+| DummyRegressor   | 3.17 |
+| LinearRegression | 2.88 |
+
+RMSE 越小越好。
+
+因此，在保持：
+
+* 相同 Features
+* 相同训练集
+* 相同测试集
+* 相同评价指标
+
+的情况下，LinearRegression 当前测试集上的预测误差低于 DummyRegressor。
+
+当前只能得出：
+
+> LinearRegression 在当前实验条件下优于 Baseline。
+
+不能直接得出：
+
+* LinearRegression 已经是一个非常准确的成绩预测模型
+* Feature 与 G3 之间存在因果关系
+* 当前模型可以直接用于真实学校决策
+
+---
+
+## Experiment 002
+
+Problem:
+
+Regression
+
+Target:
+
+G3
+
+Features:
+
+* age
+* studytime
+* failures
+* absences
+
+Excluded:
+
+* G1
+* G2
+* G3 不作为 Feature
+
+Train / Test:
+
+* test_size = 0.2
+* random_state = 42
+* 519 training samples
+* 130 testing samples
+
+Preprocessing:
+
+暂未进行额外预处理，仅使用数值 Feature。
+
+Model:
+
+LinearRegression
+
+Metric:
+
+RMSE
+
+Result:
+
+`RMSE ≈ 2.88`
+
+Baseline:
+
+`DummyRegressor RMSE ≈ 3.17`
+
+Observation:
+
+LinearRegression 会利用不同 Feature 学习不同权重，并针对不同测试样本产生不同预测结果。
+
+Conclusion:
+
+在当前实验设置和相同测试集下，LinearRegression 的 RMSE 低于 DummyRegressor，因此当前表现优于 Baseline。
+
+Limitations:
+
+当前只使用 4 个简单数值 Feature，并且只进行了一次 train/test split。
+
+模型中的 Feature 系数表示当前数据和模型中的统计关系，不能直接解释为因果关系。
