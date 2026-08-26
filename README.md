@@ -393,3 +393,155 @@ Limitations:
 当前只使用 4 个简单数值 Feature，并且只进行了一次 train/test split。
 
 模型中的 Feature 系数表示当前数据和模型中的统计关系，不能直接解释为因果关系。
+
+# Day 7：第一周总结
+
+第一周完成了一个最小的机器学习回归实验流程。
+
+## 完整实验流程
+
+本项目目前的流程为：
+
+CSV 数据
+→ pandas 读取为 DataFrame
+→ 数据理解与 EDA
+→ 选择 Feature 和 Target
+→ Train / Test Split
+→ Baseline
+→ LinearRegression
+→ Predict
+→ RMSE
+→ 模型比较
+→ 实验结论
+
+## 数据与目标
+
+当前任务属于 Regression（回归）。
+
+Target：
+
+- G3
+
+第一版 Features：
+
+- age
+- studytime
+- failures
+- absences
+
+当前暂不使用 G1 和 G2。
+
+G3 本身不能作为 Feature，因为 G3 就是当前需要预测的 Target。如果将 G3 同时放入 X 和 y，相当于使用答案预测答案，会造成数据泄漏，使实验结果失去实际意义。
+
+## Train / Test Split
+
+数据共 649 条。
+
+当前划分：
+
+- Training samples：519
+- Testing samples：130
+- test_size = 0.2
+- random_state = 42
+
+训练阶段：
+
+X_train + y_train
+→ fit()
+
+测试阶段：
+
+X_test
+→ predict()
+→ y_pred
+
+其中：
+
+- X_train：训练用 Feature
+- y_train：训练阶段对应的真实 G3
+- X_test：模型测试时看到的 Feature
+- y_pred：模型根据 X_test 得到的预测结果
+- y_test：测试数据对应的真实 G3，用于评价模型
+
+模型在 predict() 时不会看到 y_test。
+
+## Baseline
+
+使用：
+
+DummyRegressor(strategy="mean")
+
+作为最简单的 Baseline。
+
+结果：
+
+RMSE ≈ 3.17
+
+Baseline 的主要作用是为后续模型提供一个参考标准。
+
+如果一个更复杂的模型连 Baseline 都无法超过，就需要进一步分析模型、Feature、数据划分或其他实验设置。
+
+## LinearRegression
+
+第一个真正利用 Feature 进行学习的模型：
+
+LinearRegression
+
+模型通过：
+
+fit(X_train, y_train)
+
+学习 Feature 与 G3 之间的线性关系。
+
+训练后可以得到：
+
+- coef_
+- intercept_
+
+模型再通过：
+
+predict(X_test)
+
+得到预测结果 y_pred。
+
+当前结果：
+
+RMSE ≈ 2.88
+
+## 模型比较
+
+| Model | RMSE |
+| --- | ---: |
+| DummyRegressor | 3.17 |
+| LinearRegression | 2.88 |
+
+RMSE 越低表示当前测试集上的预测误差越小。
+
+因此，在相同 Feature、相同 Train / Test Split 和相同评价指标下：
+
+LinearRegression 当前测试集上的预测误差低于 DummyRegressor。
+
+所以目前可以认为：
+
+> LinearRegression 在本次实验条件下优于 Baseline。
+
+但不能直接认为当前模型已经非常准确。
+
+## 当前限制
+
+目前实验仍然比较简单：
+
+- 只使用 4 个数值 Feature
+- 暂未使用分类 Feature
+- 只进行了一次 Train / Test Split
+- 暂未加入 G1 和 G2
+- 当前实验结果不能直接推广到真实学校环境
+- 模型中的统计关系不能直接解释为因果关系
+
+## 第一周收获
+
+第一周重点不是学习复杂模型，而是建立完整的机器学习实验思维：
+
+先明确问题和数据，再选择 Feature 和 Target，划分训练集与测试集，建立 Baseline，训练模型，用未参与训练的数据评价模型，并根据指标进行有限而谨慎的实验结论。
+
+当前已经完成第一个完整的 Regression 实验闭环。
