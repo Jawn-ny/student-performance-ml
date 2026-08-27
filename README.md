@@ -1353,3 +1353,32 @@ LinearRegression RMSE ≈ 2.88
 下一阶段将开始学习：
 
 > Categorical Features 与 OneHotEncoder
+
+## Day 8：Categorical Features 与 One-Hot Encoding
+
+本阶段开始处理分类特征（Categorical Features）。
+
+数据集中包含 `school`、`sex`、`address` 等文字类别特征。这些类别不能简单编码为 `1、2、3` 后直接作为普通数值特征，因为这样可能人为引入不存在的大小和距离关系。
+
+学习并实践了 One-Hot Encoding：
+
+* 每个类别转换为独立的 0/1 特征
+* `1` 表示样本属于该类别
+* `0` 表示样本不属于该类别
+* 避免人为制造类别之间的大小顺序
+
+使用 sklearn 的 `OneHotEncoder` 对 `school` 进行实验。
+
+确认：
+
+* `school` 包含 `GP` 和 `MS` 两个类别
+* 编码后得到 `school_GP` 和 `school_MS`
+* `GP → [1, 0]`
+* `MS → [0, 1]`
+
+进一步理解：
+
+* `fit()`：学习数据中存在的类别和编码规则
+* `transform()`：按照已经学习的规则转换数据
+* OneHotEncoder 默认可以使用稀疏矩阵保存编码结果
+* 测试数据应该使用训练阶段学习到的预处理规则，而不是重新 `fit`
