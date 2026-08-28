@@ -1382,3 +1382,53 @@ LinearRegression RMSE ≈ 2.88
 * `transform()`：按照已经学习的规则转换数据
 * OneHotEncoder 默认可以使用稀疏矩阵保存编码结果
 * 测试数据应该使用训练阶段学习到的预处理规则，而不是重新 `fit`
+
+## Day 9：ColumnTransformer 与 Pipeline
+
+本阶段学习如何同时处理数值特征和分类特征，并将预处理流程与模型串联起来。
+
+当前使用的数值特征：
+
+* age
+* studytime
+* failures
+* absences
+
+当前使用的分类特征：
+
+* school
+* sex
+* address
+
+使用 `ColumnTransformer` 对不同类型的特征应用不同处理方式：
+
+* 数值特征使用 `passthrough`，保持原样
+* 分类特征使用 `OneHotEncoder`
+
+原始混合特征共有 7 列：
+
+* 4 个数值特征
+* 3 个分类特征
+
+经过 One-Hot Encoding 后，分类特征被展开，因此转换后的特征数量增加到 10 列。
+
+进一步使用 `Pipeline` 将：
+
+* ColumnTransformer 预处理
+* LinearRegression 模型
+
+串成一个完整流程。
+
+理解：
+
+* `ColumnTransformer` 负责不同列使用不同预处理方式
+* `Pipeline` 负责将多个步骤按顺序串联
+* `LinearRegression` 负责学习特征与 G3 之间的线性关系
+
+使用：
+
+* `pipeline.fit()`：执行训练阶段的预处理并训练模型
+* `pipeline.predict()`：使用训练阶段已学习的预处理规则处理测试集并进行预测
+
+Pipeline 可以减少重复手动操作，并降低训练与预测流程不一致带来的人为错误。
+
