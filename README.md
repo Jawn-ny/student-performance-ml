@@ -1432,3 +1432,209 @@ LinearRegression RMSE ≈ 2.88
 
 Pipeline 可以减少重复手动操作，并降低训练与预测流程不一致带来的人为错误。
 
+## Day 10：从 Regression 转向 Classification
+
+本阶段开始将 Student Performance 项目从回归任务扩展到分类任务。
+
+之前的 Regression 任务中：
+
+* Target：`G3`
+* 目标：预测学生最终成绩的具体数值
+
+本阶段重新定义问题，不再预测具体成绩，而是预测学生是否通过。
+
+### Classification Target
+
+本项目定义：
+
+```text
+G3 >= 10 → passed = 1
+G3 < 10  → passed = 0
+```
+
+其中：
+
+* `1` 表示通过
+* `0` 表示未通过
+
+创建新的 Target：
+
+```python
+df["passed"] = (df["G3"] >= 10).astype(int)
+```
+
+`passed` 并不是 UCI Student Performance Dataset 原本自带的标签，而是本项目根据 `G3` 自行定义的新 Target。
+
+### Regression 与 Classification
+
+Regression 用于预测具体数值，例如：
+
+```text
+G3 = 12.8
+```
+
+Classification 用于预测样本属于哪个类别，例如：
+
+```text
+passed = 1
+passed = 0
+```
+
+虽然 `passed` 使用 `0` 和 `1` 表示，但这里的数字代表类别标签，而不是普通连续数值。
+
+因此：
+
+```text
+预测 G3
+→ Regression
+
+预测 passed
+→ Classification
+```
+
+### 当前 Classification Features
+
+当前继续使用 7 个 Features。
+
+数值特征：
+
+* `age`
+* `studytime`
+* `failures`
+* `absences`
+
+分类特征：
+
+* `school`
+* `sex`
+* `address`
+
+当前仍然暂时排除：
+
+* `G1`
+* `G2`
+
+后续会单独进行加入和不加入 `G1/G2` 的对照实验。
+
+### 为什么 G3 不能作为 Feature
+
+当前 Target 的定义是：
+
+```text
+passed = G3 >= 10
+```
+
+因此 `passed` 是直接根据 `G3` 计算得到的。
+
+如果把 `G3` 同时放进 Features，模型几乎可以直接知道 `passed` 的结果，这会产生明显的数据泄漏。
+
+所以当前 Classification 实验中：
+
+```text
+Target:
+passed
+
+Feature 中排除:
+G3
+```
+
+### 查看类别分布
+
+使用：
+
+```python
+df["passed"].value_counts()
+```
+
+查看通过和未通过学生的数量。
+
+使用：
+
+```python
+df["passed"].value_counts(normalize=True)
+```
+
+查看不同类别所占的比例。
+
+在 Classification 任务中，了解类别分布很重要，因为训练集和测试集应该尽量保持与原始数据相似的类别比例。
+
+### Stratified Train/Test Split
+
+本阶段在 `train_test_split()` 中加入：
+
+```python
+stratify=y
+```
+
+例如：
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+```
+
+其中：
+
+* `test_size=0.2`：控制测试集约占全部数据的 20%
+* `random_state=42`：固定随机划分，使实验可以重复
+* `stratify=y`：切分时尽量保持各类别比例与原始数据接近
+
+例如原始数据如果大约为：
+
+```text
+通过：80%
+未通过：20%
+```
+
+那么使用 `stratify=y` 后：
+
+```text
+训练集 ≈ 80% / 20%
+测试集 ≈ 80% / 20%
+```
+
+需要注意：
+
+`stratify` 并不是为了直接提高模型准确率，而是为了让训练集和测试集的类别分布更加合理、更具有代表性。
+
+### Day 10 总结
+
+本阶段完成了：
+
+```text
+G3
+↓
+定义通过标准
+↓
+构造 passed
+↓
+Regression → Classification
+↓
+检查类别分布
+↓
+使用 stratify
+↓
+完成分类任务的 Train/Test Split
+```
+
+目前已经理解：
+
+* Regression 用于预测具体数值
+* Classification 用于预测类别
+* `passed` 是本项目自行构造的分类 Target
+* `0/1` 在这里代表类别标签
+* `G3` 不能作为 Feature，否则会产生数据泄漏
+* `stratify` 用于在 Train/Test Split 时尽量保持类别比例
+* `stratify` 不会直接提高模型性能
+
+下一阶段将学习：
+
+* `DummyClassifier`
+* `LogisticRegression`
+* `Accuracy`
+
