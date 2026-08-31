@@ -1638,3 +1638,191 @@ Regression → Classification
 * `LogisticRegression`
 * `Accuracy`
 
+## Day 11：Classification Baseline 与 Logistic Regression
+
+本阶段开始训练第一个 Classification 模型，并使用 Accuracy 对模型进行评价。
+
+### DummyClassifier Baseline
+
+分类任务同样需要建立 Baseline。
+
+本实验使用：
+
+```python
+DummyClassifier(strategy="most_frequent")
+```
+
+`most_frequent` 表示模型始终预测训练集中数量最多的类别。
+
+当前数据中 `passed = 1` 为多数类，因此 DummyClassifier 基本将所有测试样本都预测为：
+
+```text
+passed = 1
+```
+
+当前结果：
+
+```text
+DummyClassifier Accuracy ≈ 0.8462
+```
+
+即约：
+
+```text
+84.62%
+```
+
+进一步检查测试集类别比例后发现：
+
+```text
+passed = 1 ≈ 84.62%
+passed = 0 ≈ 15.38%
+```
+
+因此 DummyClassifier 的 Accuracy 几乎等于测试集中多数类本身的比例。
+
+这说明：
+
+较高的 Accuracy 并不一定表示模型真正学习到了有效规律。
+
+---
+
+### Accuracy
+
+Accuracy 表示所有预测中预测正确的比例。
+
+例如：
+
+```text
+130 个测试样本
+104 个预测正确
+```
+
+则：
+
+```text
+Accuracy = 104 / 130 = 0.80
+```
+
+即：
+
+```text
+80%
+```
+
+Accuracy 越高通常表示预测正确的比例越高。
+
+但在类别分布不均衡的 Classification 任务中，Accuracy 不能单独使用，需要结合 Baseline 和后续错误分析一起判断。
+
+---
+
+### LogisticRegression
+
+本阶段使用：
+
+```python
+LogisticRegression()
+```
+
+建立第一个真正的 Classification 模型。
+
+虽然名称中包含 `Regression`，但 LogisticRegression 是经典的分类模型。
+
+当前任务中：
+
+```text
+输入：
+age
+studytime
+failures
+absences
+school
+sex
+address
+
+输出：
+passed = 0 / 1
+```
+
+由于输入中包含文字分类 Feature，因此继续使用 Day 9 学习的 Pipeline：
+
+```text
+原始 Features
+↓
+ColumnTransformer
+↓
+数值列 passthrough
+分类列 OneHotEncoder
+↓
+LogisticRegression
+↓
+passed = 0 / 1
+```
+
+Pipeline 会保证训练和预测阶段使用相同的预处理流程。
+
+---
+
+### LogisticRegression Result
+
+当前 LogisticRegression：
+
+```text
+Accuracy = 0.80
+```
+
+即：
+
+```text
+80%
+```
+
+Baseline：
+
+```text
+DummyClassifier Accuracy ≈ 84.62%
+```
+
+比较：
+
+```text
+LogisticRegression: 80%
+DummyClassifier:     84.62%
+```
+
+因此在当前实验条件和测试集上：
+
+```text
+LogisticRegression 没有超过 Baseline
+```
+
+虽然 LogisticRegression 会根据 Features 学习分类规律，而 DummyClassifier 只是简单预测多数类，但当前 Accuracy 指标下，LogisticRegression 的表现仍然低于 Baseline。
+
+因此不能因为 `80%` 看起来较高，就认为当前模型已经表现良好。
+
+---
+
+### 当前实验结论
+
+在当前：
+
+```text
+Features
+Train/Test Split
+模型参数
+测试集
+Accuracy 指标
+```
+
+条件下，LogisticRegression 没有优于 DummyClassifier Baseline。
+
+这并不直接说明 LogisticRegression 本身无效，也不能直接说明数据存在问题。
+
+可能还需要进一步分析：
+
+* 类别分布不均衡
+* 当前 Features 提供的信息是否足够
+* 模型具体把哪些样本预测错
+* Accuracy 是否能够完整反映模型表现
+
+下一阶段将学习 Confusion Matrix，进一步观察模型分别把哪些类别预测正确或预测错误。
