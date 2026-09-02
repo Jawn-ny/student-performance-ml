@@ -1826,3 +1826,337 @@ Accuracy 指标
 * Accuracy 是否能够完整反映模型表现
 
 下一阶段将学习 Confusion Matrix，进一步观察模型分别把哪些类别预测正确或预测错误。
+
+## Day 12：Confusion Matrix
+
+本阶段进一步分析 Classification 模型的预测结果。
+
+Day 11 中 LogisticRegression 的结果为：
+
+```text
+Accuracy = 0.80
+```
+
+这表示测试集中约 80% 的样本被模型预测正确。
+
+但是，只看 Accuracy 无法知道模型具体把哪些类别预测正确，以及哪些类别预测错误。
+
+因此，本阶段使用 Confusion Matrix 对分类模型的预测结果进行进一步分析。
+
+---
+
+### Confusion Matrix
+
+使用：
+
+```python
+from sklearn.metrics import confusion_matrix
+```
+
+计算混淆矩阵：
+
+```python
+cm = confusion_matrix(y_test_cls, y_pred_logistic)
+cm
+```
+
+当前实验结果：
+
+```text
+[[  2, 18],
+ [  8,102]]
+```
+
+在 sklearn 默认的二分类 Confusion Matrix 中，矩阵结构为：
+
+```text
+[[TN, FP],
+ [FN, TP]]
+```
+
+因此当前结果为：
+
+```text
+TN = 2
+FP = 18
+FN = 8
+TP = 102
+```
+
+---
+
+### TP / TN / FP / FN
+
+当前项目定义：
+
+```text
+1 = passed
+0 = failed
+```
+
+因此：
+
+#### TN = 2
+
+```text
+真实 = 0
+预测 = 0
+```
+
+表示学生真实未通过，并且模型也预测为未通过。
+
+共 2 人。
+
+#### FP = 18
+
+```text
+真实 = 0
+预测 = 1
+```
+
+表示学生真实未通过，但是模型错误预测为通过。
+
+共 18 人。
+
+#### FN = 8
+
+```text
+真实 = 1
+预测 = 0
+```
+
+表示学生真实通过，但是模型错误预测为未通过。
+
+共 8 人。
+
+#### TP = 102
+
+```text
+真实 = 1
+预测 = 1
+```
+
+表示学生真实通过，并且模型也预测为通过。
+
+共 102 人。
+
+---
+
+### 使用 ravel() 拆分 Confusion Matrix
+
+使用：
+
+```python
+tn, fp, fn, tp = cm.ravel()
+```
+
+可以将原来的二维矩阵：
+
+```text
+[[2, 18],
+ [8, 102]]
+```
+
+展开为：
+
+```text
+[2, 18, 8, 102]
+```
+
+并分别保存为：
+
+```text
+TN = 2
+FP = 18
+FN = 8
+TP = 102
+```
+
+这样可以更加方便地查看和使用 Confusion Matrix 中的四种结果。
+
+---
+
+### 当前模型表现
+
+真实未通过的学生共有：
+
+```text
+TN + FP
+= 2 + 18
+= 20 人
+```
+
+其中：
+
+```text
+正确预测未通过：2 人
+错误预测为通过：18 人
+```
+
+说明模型对未通过学生的识别能力较差。
+
+真实通过的学生共有：
+
+```text
+TP + FN
+= 102 + 8
+= 110 人
+```
+
+其中：
+
+```text
+正确预测通过：102 人
+错误预测为未通过：8 人
+```
+
+说明当前模型明显更擅长识别：
+
+```text
+passed = 1
+```
+
+也就是“通过”的学生。
+
+---
+
+### Accuracy 与 Confusion Matrix
+
+当前预测正确的样本数为：
+
+```text
+TN + TP
+= 2 + 102
+= 104
+```
+
+测试集共有：
+
+```text
+130
+```
+
+个样本。
+
+因此：
+
+```text
+Accuracy
+= 104 / 130
+= 0.80
+```
+
+即：
+
+```text
+80%
+```
+
+Accuracy 可以告诉我们模型总体预测正确的比例。
+
+但是，仅仅看到：
+
+```text
+Accuracy = 80%
+```
+
+无法发现模型具体在哪些类别上出现问题。
+
+例如：
+
+```text
+真实未通过的学生共有 20 人，
+其中有 18 人被模型错误预测为通过。
+```
+
+如果只观察 Accuracy，这个问题并不明显。
+
+Confusion Matrix 则可以进一步展示：
+
+- 哪些样本预测正确
+- 哪些样本预测错误
+- 模型把哪个类别误判成了哪个类别
+- 模型是否更倾向于某一个类别
+
+因此，Confusion Matrix 能够帮助我们更加完整地理解分类模型的预测表现。
+
+---
+
+### Day 12 实验结论
+
+当前 LogisticRegression：
+
+```text
+Accuracy = 80%
+
+TN = 2
+FP = 18
+FN = 8
+TP = 102
+```
+
+在当前实验条件和测试集上，模型虽然整体 Accuracy 为 80%，但是预测结果存在明显的类别差异。
+
+模型对 `passed = 1` 的学生识别较好，但对 `passed = 0` 的学生识别能力较差。
+
+真实未通过的 20 名学生中，只有 2 名被正确识别，另外 18 名被错误预测为通过。
+
+因此：
+
+```text
+Accuracy
+```
+
+不能完整反映当前分类模型的表现。
+
+还需要结合：
+
+```text
+Confusion Matrix
+```
+
+分析不同类别的预测情况和错误类型。
+
+---
+
+### Day 12 总结
+
+本阶段学习并实践了：
+
+- Confusion Matrix
+- True Positive（TP）
+- True Negative（TN）
+- False Positive（FP）
+- False Negative（FN）
+- `confusion_matrix()`
+- `ravel()`
+- Accuracy 与 Confusion Matrix 的区别
+
+目前已经理解：
+
+```text
+TP：真实通过，预测通过
+TN：真实未通过，预测未通过
+FP：真实未通过，预测通过
+FN：真实通过，预测未通过
+```
+
+同时认识到：
+
+```text
+Accuracy
+→ 告诉我们总体预测正确多少
+
+Confusion Matrix
+→ 告诉我们具体对在哪里、错在哪里
+```
+
+下一阶段将进行 G1 / G2 对照实验，比较：
+
+```text
+不使用 G1 / G2
+vs
+使用 G1 / G2
+```
+
+并进一步讨论 Feature 可用时间、预测场景以及数据泄漏问题。
