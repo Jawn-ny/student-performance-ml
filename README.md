@@ -2160,3 +2160,316 @@ vs
 ```
 
 并进一步讨论 Feature 可用时间、预测场景以及数据泄漏问题。
+
+## Day 13：G1 / G2 对照实验
+
+本阶段进行 G1 / G2 对照实验，比较：
+
+```text
+Experiment A
+不使用 G1 / G2
+
+vs
+
+Experiment B
+加入 G1 / G2
+```
+
+实验目的不仅是比较 Accuracy，还需要进一步理解：
+
+- Feature 在预测时间点是否可获得
+- Feature 是否会造成数据泄漏
+- 加入新的 Feature 是否改变了原本的预测场景
+
+---
+
+### G1 / G2 与预测时间点
+
+在 Student Performance Dataset 中：
+
+```text
+G1 = 第一阶段成绩
+G2 = 第二阶段成绩
+G3 = 最终成绩
+```
+
+当前 Classification Target 定义为：
+
+```text
+G3 >= 10 → passed = 1
+G3 < 10  → passed = 0
+```
+
+G1 / G2 是否适合作为 Feature，需要根据预测发生的时间点判断。
+
+如果任务是：
+
+```text
+在学生刚开学时预测最终是否通过
+```
+
+此时：
+
+```text
+G1 / G2 尚未产生
+```
+
+因此它们在现实预测场景中不可获得，不适合作为 Feature。
+
+如果任务是：
+
+```text
+在 G2 成绩已经公布后预测最终是否通过
+```
+
+此时：
+
+```text
+G1 / G2 已经存在
+```
+
+因此可以考虑将它们作为 Feature。
+
+这说明：
+
+```text
+Feature 是否合理
+不仅取决于它是否与 Target 有关系
+还取决于预测时它是否真实可获得
+```
+
+---
+
+### G3 与数据泄漏
+
+当前 Target：
+
+```text
+passed = G3 >= 10
+```
+
+因此 G3 不能作为 Feature。
+
+如果模型看到：
+
+```text
+G3 = 15
+```
+
+就几乎可以直接知道：
+
+```text
+passed = 1
+```
+
+因此把 G3 放入 X 会造成明显的数据泄漏。
+
+需要区分：
+
+```text
+G1 / G2
+→ 是否可以使用取决于预测时间点
+
+G3
+→ 当前任务中会直接泄漏 Target
+→ 不能作为 Feature
+```
+
+判断 Feature 时至少需要考虑：
+
+```text
+1. 预测发生时，这个 Feature 是否已经能够获得？
+
+2. 这个 Feature 是否会直接或间接泄漏 Target？
+```
+
+---
+
+### Experiment A：不使用 G1 / G2
+
+Experiment A 使用原来的 7 个 Features。
+
+数值特征：
+
+- age
+- studytime
+- failures
+- absences
+
+分类特征：
+
+- school
+- sex
+- address
+
+当前结果：
+
+```text
+LogisticRegression Accuracy = 0.80
+```
+
+即：
+
+```text
+80%
+```
+
+该实验更接近较早阶段进行预测的场景。
+
+---
+
+### Experiment B：加入 G1 / G2
+
+Experiment B 在原有 Features 基础上加入：
+
+- G1
+- G2
+
+新的数值 Features：
+
+```text
+age
+studytime
+failures
+absences
+G1
+G2
+```
+
+分类 Features 保持：
+
+```text
+school
+sex
+address
+```
+
+为了使 Experiment A 与 Experiment B 尽量具有可比性，本实验继续使用相同的训练集和测试集样本。
+
+Experiment B 使用：
+
+```text
+ColumnTransformer
+↓
+OneHotEncoder
+↓
+LogisticRegression
+```
+
+完成预处理和模型训练。
+
+当前结果：
+
+```text
+Experiment A - without G1/G2: 0.80
+Experiment B - with G1/G2:    0.90
+```
+
+即：
+
+```text
+不使用 G1/G2
+Accuracy = 80%
+
+加入 G1/G2
+Accuracy = 90%
+```
+
+---
+
+### 实验结果分析
+
+在当前数据和实验条件下：
+
+```text
+加入 G1 / G2 后
+Accuracy 从 80% 提高到 90%
+```
+
+说明在当前实验中，加入 G1 / G2 后模型的预测表现明显提高。
+
+但不能简单得出：
+
+```text
+G1 / G2 一定应该加入所有学生成绩预测模型
+```
+
+因为 Experiment A 和 Experiment B 对应的预测场景并不完全相同。
+
+Experiment A 更接近：
+
+```text
+较早阶段预测
+→ 不知道 G1 / G2
+```
+
+Experiment B 更接近：
+
+```text
+G2 已经公布
+→ 已经知道 G1 / G2
+→ 再预测最终是否通过
+```
+
+后一个场景拥有更晚阶段、更接近最终成绩的信息，因此预测任务本身也发生了变化。
+
+所以不能把 Accuracy 的提高全部简单理解成：
+
+```text
+模型本身变得更强
+```
+
+更准确的结论应该是：
+
+> 在当前数据、相同测试样本和实验条件下，加入 G1 / G2 后 LogisticRegression 的 Accuracy 从 80% 提高到 90%。但由于 G1 / G2 是较晚阶段才能获得的信息，Experiment B 对应的预测时间点也更晚，因此两个实验的现实预测场景并不完全相同。
+
+---
+
+### Day 13 总结
+
+本阶段学习并实践了：
+
+- G1 / G2 对照实验
+- Feature 可用时间
+- 预测时间点
+- 数据泄漏
+- 相同测试样本下进行模型比较
+- 实验结果不能脱离预测场景解释
+
+当前结果：
+
+```text
+Experiment A
+without G1/G2
+Accuracy = 0.80
+
+Experiment B
+with G1/G2
+Accuracy = 0.90
+```
+
+目前已经理解：
+
+```text
+Feature 能不能用
+≠
+只看它是否与 Target 相关
+```
+
+还需要考虑：
+
+```text
+预测时是否能够获得
++
+是否会泄漏答案
++
+是否改变原本的预测场景
+```
+
+下一阶段将整理第二阶段实验内容，包括：
+
+- Notebook
+- 实验记录
+- README
+- Git
+- Regression 与 Classification 阶段总结
