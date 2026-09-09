@@ -2473,3 +2473,165 @@ Feature 能不能用
 - README
 - Git
 - Regression 与 Classification 阶段总结
+
+## Day 14：项目工程化整理
+
+完成基础机器学习实验后，将 Notebook 中的实验代码进一步整理为可以重复运行的 Python 脚本。
+
+当前项目结构：
+
+```text
+student-performance-ml/
+├── data/
+│   └── raw/
+│       └── student-por.csv
+├── notebooks/
+│   └── 01_eda.ipynb
+├── src/
+│   ├── load_data.py
+│   ├── train_regression.py
+│   ├── train_classification.py
+│   └── evaluate.py
+├── models/
+│   └── classification_pipeline.joblib
+├── reports/
+│   ├── figures/
+│   └── report.md
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+### Notebook 与 Python Script
+
+Notebook 主要用于：
+
+- 数据探索
+- EDA
+- 图表观察
+- 实验过程
+- 学习记录
+- 实验结论
+
+`src/` 中的 Python 脚本主要用于：
+
+- 可重复执行的数据读取
+- 模型训练
+- 模型预测
+- 模型评价
+- 模型保存
+
+---
+
+### Regression Script
+
+运行：
+
+```bash
+python src/train_regression.py
+```
+
+当前结果：
+
+```text
+DummyRegressor RMSE ≈ 3.17
+LinearRegression RMSE ≈ 2.88
+```
+
+---
+
+### Classification Script
+
+运行：
+
+```bash
+python src/train_classification.py
+```
+
+当前结果：
+
+```text
+DummyClassifier Accuracy ≈ 0.8462
+LogisticRegression Accuracy = 0.80
+```
+
+Confusion Matrix：
+
+```text
+[[  2, 18],
+ [  8,102]]
+```
+
+---
+
+### Saved Pipeline
+
+Classification Pipeline 保存到：
+
+```text
+models/classification_pipeline.joblib
+```
+
+Pipeline 中包含：
+
+```text
+ColumnTransformer
+OneHotEncoder
+LogisticRegression
+```
+
+已经验证模型能够：
+
+```text
+保存
+↓
+重新加载
+↓
+继续预测
+```
+
+不要加载来源不可信的 joblib / pickle 文件。
+
+模型文件可能依赖当前 Python、scikit-learn 和其他依赖版本。
+
+---
+
+### 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 当前阶段
+
+目前已经完成：
+
+- 数据读取
+- EDA
+- Regression
+- Classification
+- Baseline
+- RMSE
+- Accuracy
+- Confusion Matrix
+- OneHotEncoder
+- ColumnTransformer
+- Pipeline
+- G1/G2 对照实验
+- 正式训练脚本
+- 模型评价函数
+- Pipeline 保存与加载
+- README / 实验报告 / Git 项目整理
+
+下一阶段将进一步学习：
+
+- Overfitting / Underfitting
+- Train / Validation / Test
+- Cross Validation
+- StandardScaler
+- Ridge / Lasso
+- 参数与超参数
+- Decision Tree
+- Random Forest
