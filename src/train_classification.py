@@ -1,7 +1,9 @@
+import joblib
 from sklearn.model_selection import train_test_split
+
 from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
+from evaluate import evaluate_classification
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -57,11 +59,10 @@ dummy_model.fit(X_train, y_train)
 
 y_pred_dummy = dummy_model.predict(X_test)
 
-dummy_accuracy = accuracy_score(
+dummy_accuracy, _ = evaluate_classification(
     y_test,
     y_pred_dummy
 )
-
 
 # 6. Preprocessing
 
@@ -104,15 +105,15 @@ y_pred_logistic = classification_pipeline.predict(
 
 # 10. Evaluate
 
-logistic_accuracy = accuracy_score(
+logistic_accuracy, cm = evaluate_classification(
     y_test,
     y_pred_logistic
 )
 
-cm = confusion_matrix(
-    y_test,
-    y_pred_logistic
-)
+print("LogisticRegression Accuracy:", logistic_accuracy)
+
+print("\nConfusion Matrix:")
+print(cm)
 
 
 # 11. Print results
@@ -122,3 +123,16 @@ print("LogisticRegression Accuracy:", logistic_accuracy)
 
 print("\nConfusion Matrix:")
 print(cm)
+
+joblib.dump(
+    classification_pipeline,
+    "models/classification_pipeline.joblib"
+)
+
+loaded_pipeline = joblib.load(
+    "models/classification_pipeline.joblib"
+)
+
+loaded_predictions = loaded_pipeline.predict(X_test)
+
+print("Loaded model predictions:", loaded_predictions[:5])
